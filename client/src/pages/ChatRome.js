@@ -13,21 +13,17 @@ import {
   TextField,
   Fab,
   IconButton,
-  Typography,
-  Button,
 } from '@material-ui/core';
 import AttachmentIcon from '@material-ui/icons/Attachment';
 import { socket } from '../utils/socket';
 import SendIcon from '@material-ui/icons/Send';
 import { useDispatch, useSelector } from 'react-redux';
 import { getMessages, setChatRoom, clear } from '../redux/chat/chatAction';
-import {
-  getPrivateRooms,
-  getPublicRooms,
-  addPublicRoom,
-  createPrivateRoom,
-  createPublicRoom,
-} from '../redux/room/roomAction';
+import { getPrivateRooms, getPublicRooms } from '../redux/room/roomAction';
+
+import PublicRoomModal from '../components/PublicRoomModal';
+import PrivateRoomModal from '../components/PrivateRoomModal';
+
 // material ui style
 const useStyles = makeStyles((theme) => ({
   chatroom: {
@@ -63,7 +59,7 @@ const ChatRome = ({ history }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [message, setMassage] = useState('');
-  const [search, setSearch] = useState('');
+
   const messages = useSelector((state) => state.chat.messages);
 
   const currentUser = useSelector((state) => state.user.currentUser);
@@ -79,7 +75,7 @@ const ChatRome = ({ history }) => {
       dispatch(getPublicRooms());
       dispatch(getPrivateRooms());
     }
-  }, [currentUser, history]);
+  }, [currentUser, history, dispatch]);
 
   useEffect(() => {
     if (currentChatRoom) {
@@ -112,7 +108,7 @@ const ChatRome = ({ history }) => {
       socket.off('joinRoom');
       dispatch(clear());
     };
-  }, [currentChatRoom]);
+  }, [currentChatRoom, dispatch]);
 
   const sendMassage = () => {
     console.log(currentUser);
@@ -151,43 +147,18 @@ const ChatRome = ({ history }) => {
     // socket.emit('joinRoom', { room: currentChatRoom });
   };
 
-  const privateSearch = () => {};
-  const publicSearch = () => {
-    console.log(search);
-  };
   return (
     <Container component='main' className={classes.container}>
       <div className={classes.chatroom}>
         <Grid container style={{ marginBottom: 6 }}>
-          <Grid item xs={9}>
-            <TextField
-              id='room'
-              name='room'
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-              }}
-              label='Search for publicRoom or privateContact'
-              variant='outlined'
-              style={{ marginRight: 12, width: '50%' }}
-              placeholder='Search for publicRoom or privateContact'
-            />
-            <Button
-              onClick={() => publicSearch()}
-              color='primary'
-              size='small'
-              variant='contained'
-              style={{ marginRight: 6 }}>
-              Search Public
-            </Button>
-            <Button onClick={() => privateSearch()} color='primary' size='small' variant='contained'>
-              Search Private
-            </Button>
+          <Grid item xs={4}>
+            <PublicRoomModal />
           </Grid>
-          <Grid item xs={3}>
-            <Typography variant='h6' color='secondary'>
-              {currentChatRoom}
-            </Typography>
+          <Grid item xs={4}>
+            {currentChatRoom}
+          </Grid>
+          <Grid item xs={4}>
+            <PrivateRoomModal />
           </Grid>
         </Grid>
         <Grid container component={Paper} className={classes.chatSection}>
@@ -209,7 +180,7 @@ const ChatRome = ({ history }) => {
                     return (
                       <ListItem button key={`${currentUser.id}${message.message}${index}`}>
                         <ListItemText>{message.message}</ListItemText>
-                        <ListItemText>{`from ${message.senderName}`}</ListItemText>
+                        <ListItemText>{` < from ${message.senderName}`}</ListItemText>
                       </ListItem>
                     );
                   } else if (message.type.includes('image/')) {
@@ -217,10 +188,10 @@ const ChatRome = ({ history }) => {
                       <ListItem button key={`${currentUser.id}${message.message}${index}`}>
                         <img
                           style={{ maxWidth: '200px' }}
-                          src={`http://localhost:5000/${message.message}`}
+                          src={`http://localhost:5000/files/${message.message}`}
                           alt='img'
                         />
-                        <ListItemText>{`from ${message.senderName}`}</ListItemText>
+                        <ListItemText>{` < from ${message.senderName}`}</ListItemText>
                       </ListItem>
                     );
                   } else if (message.type.includes('video/')) {
@@ -228,19 +199,19 @@ const ChatRome = ({ history }) => {
                       <ListItem button key={`${currentUser.id}${message.message}${index}`}>
                         <video
                           style={{ maxWidth: '200px' }}
-                          src={`http://localhost:5000/${message.message}`}
+                          src={`http://localhost:5000/files/${message.message}`}
                           alt='video'
                           type='video/mp4'
                           controls
                         />
-                        <ListItemText>{`from ${message.senderName}`}</ListItemText>
+                        <ListItemText>{` < from ${message.senderName}`}</ListItemText>
                       </ListItem>
                     );
                   } else {
                     return (
                       <ListItem button key={`${currentUser.id}${message.message}${index}`}>
-                        <a href={`http://localhost:5000/${message.message}`}>{message.message}</a>
-                        <ListItemText>{`from ${message.senderName}`}</ListItemText>
+                        <a href={`http://localhost:5000/files/${message.message}`}>{message.message}</a>
+                        <ListItemText>{` < from ${message.senderName}`}</ListItemText>
                       </ListItem>
                     );
                   }
@@ -285,7 +256,15 @@ const ChatRome = ({ history }) => {
               {privateRooms &&
                 privateRooms.map((room) => (
                   <ListItem button key={room._id}>
-                    <ListItemText onClick={() => onRoomClick(room)} primary={room.name}></ListItemText>
+                    {currentUser.id === room.creator._id ? (
+                      <ListItemText
+                        onClick={() => onRoomClick(room)}
+                        primary={room.receiver.email}></ListItemText>
+                    ) : (
+                      <ListItemText
+                        onClick={() => onRoomClick(room)}
+                        primary={room.creator.email}></ListItemText>
+                    )}
                   </ListItem>
                 ))}
             </List>

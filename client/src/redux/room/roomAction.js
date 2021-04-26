@@ -1,4 +1,4 @@
-import { GET_USER_PRIVATE_ROOMS, GET_USER_PUBLIC_ROOMS } from '../types';
+import { GET_USER_PRIVATE_ROOMS, GET_USER_PUBLIC_ROOMS, ROOM_ERROR } from '../types';
 import axios from 'axios';
 
 export const addPublicRoom = ({ name }) => async (dispatch) => {
@@ -6,7 +6,10 @@ export const addPublicRoom = ({ name }) => async (dispatch) => {
     await axios.post('/room/public/join', { name });
     dispatch(getPublicRooms());
   } catch (error) {
-    console.log(error.message);
+    dispatch({
+      type: ROOM_ERROR,
+      payload: error.response.data.errors,
+    });
   }
 };
 
@@ -15,7 +18,10 @@ export const createPublicRoom = ({ name }) => async (dispatch) => {
     await axios.post('/room/public', { name });
     dispatch(getPublicRooms());
   } catch (error) {
-    console.log(error.message);
+    dispatch({
+      type: ROOM_ERROR,
+      payload: error.response.data.errors,
+    });
   }
 };
 
@@ -24,7 +30,10 @@ export const createPrivateRoom = ({ email }) => async (dispatch) => {
     await axios.post('/room/private', { email });
     dispatch(getPrivateRooms());
   } catch (error) {
-    console.log(error.message);
+    dispatch({
+      type: ROOM_ERROR,
+      payload: error.response.data.errors,
+    });
   }
 };
 

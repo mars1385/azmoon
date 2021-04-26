@@ -2,7 +2,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import { Container, Typography, TextField, Button, makeStyles, Grid } from '@material-ui/core';
 
-import { registerUser } from '../redux/user/userAction';
+import { registerUser, clearError } from '../redux/user/userAction';
 import { useDispatch, useSelector } from 'react-redux';
 // ------------end imports-----------
 
@@ -31,13 +31,20 @@ const Register = ({ history }) => {
 
   const currentUser = useSelector((state) => state.user.currentUser);
   const errors = useSelector((state) => state.user.error);
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     if (currentUser) {
       history.push('/chatroom');
     }
   }, [currentUser, history]);
-  const dispatch = useDispatch();
+
   const onSubmit = (event) => {
     event.preventDefault();
     dispatch(registerUser({ email }));

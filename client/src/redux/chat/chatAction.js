@@ -1,4 +1,4 @@
-import { SEND_CHAT, SEND_FAILED, CURRENT_CHAT_ROOM, SET_MESSAGE_INFO, CLEAR_CHAT } from '../types';
+import { SEND_CHAT, SEND_FAILED, CURRENT_CHAT_ROOM, CLEAR_CHAT } from '../types';
 
 export const getMessages = (message) => async (dispatch) => {
   try {

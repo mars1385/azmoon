@@ -1,8 +1,6 @@
 //------------------import----------------
 const BadRequestError = require('../utils/errors/BadRequestError');
-const NotFoundError = require('../utils/errors/NotFoundError');
 const asyncHandler = require('../utils/asyncHandler');
-const axios = require('axios');
 
 //import models
 const Room = require('../models/Room');
@@ -15,6 +13,12 @@ const User = require('../models/User');
 exports.createPublicRoom = asyncHandler(async (req, res, next) => {
   req.body.creator = req.session.userId;
   req.body.users = req.session.userId;
+
+  const existRoom = await Room.findOne({ name: req.body.name, role: 'public' });
+
+  if (existRoom) {
+    return next(new BadRequestError('Room with this name already exist'));
+  }
 
   const room = await Room.create(req.body);
 
@@ -70,6 +74,12 @@ exports.createPrivateRoom = asyncHandler(async (req, res, next) => {
     receiver: user.id,
   };
 
+  const existRoom = await Room.findOne({ name: info.name, role: 'private' });
+
+  if (existRoom) {
+    return next(new BadRequestError('Room with this name already exist'));
+  }
+
   const room = await Room.create(info);
 
   res.status(201).json({
@@ -103,9 +113,13 @@ exports.getPublicRoom = asyncHandler(async (req, res, next) => {
 // @route   GET /room/public
 // @access  Private
 exports.getPrivateRoom = asyncHandler(async (req, res, next) => {
-  const yourRoom = await Room.find({ role: 'private', creator: req.session.userId });
+  const yourRoom = await Room.find({ role: 'private', creator: req.session.userId }).populate(
+    'receiver creator'
+  );
 
-  const invitedRoom = await Room.find({ role: 'private', receiver: req.session.userId });
+  const invitedRoom = await Room.find({ role: 'private', receiver: req.session.userId }).populate(
+    'receiver creator'
+  );
 
   res.status(201).json({
     success: true,

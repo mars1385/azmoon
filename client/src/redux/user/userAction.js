@@ -1,4 +1,4 @@
-import { SET_USER_INFO, AUTH_FAILED, LOGOUT_USER, CURRENT_CHAT_ROOM } from '../types';
+import { SET_USER_INFO, AUTH_FAILED, LOGOUT_USER, CLEAR_ERROR } from '../types';
 import axios from 'axios';
 
 export const registerUser = (userInfo) => async (dispatch) => {
@@ -49,9 +49,10 @@ export const getUserInfo = () => async (dispatch) => {
       payload: userInfo.data.user,
     });
   } catch (error) {
-    dispatch({
-      type: AUTH_FAILED,
-      payload: error.response.data.errors,
-    });
+    console.log('error');
   }
 };
+
+export const clearError = () => ({
+  type: CLEAR_ERROR,
+});

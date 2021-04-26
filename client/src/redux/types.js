@@ -14,3 +14,6 @@ export const CLEAR_CHAT = 'CLEAR_CHAT';
 // room
 export const GET_USER_PUBLIC_ROOMS = 'GET_USER_PUBLIC_ROOMS';
 export const GET_USER_PRIVATE_ROOMS = 'GET_USER_PRIVATE_ROOMS';
+export const ROOM_ERROR = 'ROOM_ERROR';
+
+export const CLEAR_ERROR = 'CLEAR_ERROR';

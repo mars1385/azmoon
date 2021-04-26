@@ -22,14 +22,14 @@ exports.register = asyncHandler(async (req, res, next) => {
 
   if (existingUser) return next(new BadRequestError('An User already exist with this email'));
 
-  // const emailChecker = await axios.get(
-  //   `http://apilayer.net/api/check?access_key=${process.env.API_KEY}&email=${email}`
-  // );
+  const emailChecker = await axios.get(
+    `http://apilayer.net/api/check?access_key=${process.env.API_KEY}&email=${email}`
+  );
 
-  // if (emailChecker.data.smtp_check === false) {
-  //   return next(new BadRequestError('Please add a valid email'));
-  // }
-  req.body.userName = 'emailChecker.data.user';
+  if (emailChecker.data.smtp_check === false) {
+    return next(new BadRequestError('Please add a valid email'));
+  }
+  req.body.userName = emailChecker.data.user;
   const user = await User.create(req.body);
 
   const publicRoom = await Room.findOne({ name: 'public-room' });

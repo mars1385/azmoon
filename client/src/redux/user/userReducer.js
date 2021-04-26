@@ -1,4 +1,4 @@
-import { SET_USER_INFO, AUTH_FAILED, LOGOUT_USER } from '../types';
+import { SET_USER_INFO, AUTH_FAILED, LOGOUT_USER, CLEAR_ERROR } from '../types';
 
 const initialState = {
   currentUser: null,
@@ -13,6 +13,8 @@ const userReducer = (state = initialState, action) => {
       return { ...state, currentUser: null, error: action.payload };
     case LOGOUT_USER:
       return { ...state, currentUser: null, error: null };
+    case CLEAR_ERROR:
+      return { ...state, error: null };
     default:
       return state;
   }
