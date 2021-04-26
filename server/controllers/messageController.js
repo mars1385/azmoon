@@ -15,7 +15,7 @@ exports.uploadFile = asyncHandler(async (req, res, next) => {
   //   return next(new BadRequestError(`Size of image number ${index + 1},is larger than 5 MB`));
   // }
 
-  upload.name = `upload_${req.session.userId}a${upload.size}${path.parse(upload.name).ext}`;
+  upload.name = `upload_${req.user}a${upload.size}${path.parse(upload.name).ext}`;
   upload.mv(`${process.env.FILE_UPLOAD_PATH}/${upload.name}`, async (err) => {
     if (err) {
       return next(new BadRequestError('Error in File upload'));

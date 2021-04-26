@@ -7,11 +7,26 @@ import Home from './pages/Home';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import ChatRome from './pages/ChatRome';
-import { getUserInfo } from './redux/user/userAction';
+import { getUserInfo, logoutUser } from './redux/user/userAction';
+import setAuthHeader from './utils/setAuthHeader';
+import jwt_decode from 'jwt-decode';
 
 function App() {
   React.useEffect(() => {
-    store.dispatch(getUserInfo());
+    // store.dispatch(getUserInfo());
+    if (localStorage.jwt_token) {
+      setAuthHeader(localStorage.jwt_token);
+
+      store.dispatch(getUserInfo());
+      const decodedToken = jwt_decode(localStorage.jwt_token);
+
+      const now = Date.now() / 1000;
+      if (decodedToken.exp < now) {
+        store.dispatch(logoutUser());
+
+        window.location.href = '/login';
+      }
+    }
   }, []);
   return (
     <Provider store={store}>

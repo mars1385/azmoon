@@ -3,6 +3,7 @@ const BadRequestError = require('../utils/errors/BadRequestError');
 const NotFoundError = require('../utils/errors/NotFoundError');
 const asyncHandler = require('../utils/asyncHandler');
 const axios = require('axios');
+const jwt = require('jsonwebtoken');
 
 //import models
 const Room = require('../models/Room');
@@ -44,9 +45,13 @@ exports.register = asyncHandler(async (req, res, next) => {
     { new: true, runValidators: true }
   );
 
-  req.session.userId = user.id;
+  const token = jwt.sign({ name: user.name, id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE_TIME,
+  });
+  // req.session.userId = user.id;
   res.status(201).json({
     user,
+    token,
   });
 });
 
@@ -60,10 +65,15 @@ exports.login = asyncHandler(async (req, res, next) => {
   const user = await User.findOne({ email });
   if (!user) return next(new BadRequestError('Email is Wrong'));
 
-  req.session.userId = user.id;
+  const token = jwt.sign({ name: user.name, id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE_TIME,
+  });
+
+  // req.session.userId = user.id;
 
   res.status(200).json({
     user,
+    token,
   });
 });
 
@@ -71,7 +81,8 @@ exports.login = asyncHandler(async (req, res, next) => {
 // @route   GET user/
 // @access  Private
 exports.userInfo = asyncHandler(async (req, res, next) => {
-  const user = await User.findById(req.session.userId);
+  // const user = await User.findById(req.session.userId);
+  const user = await User.findById(req.user);
 
   if (!user) {
     return next(new NotFoundError('User can not be found'));

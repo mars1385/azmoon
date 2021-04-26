@@ -23,27 +23,27 @@ const app = express();
 dbConnection(process.env.DATA_BASE_URL);
 // redis & session
 
-const redisClient = new Redis(process.env.REDIS_URL);
+// const redisClient = new Redis(process.env.REDIS_URL);
 
-const redisSessionStore = connectRedis(session);
-app.use(
-  session({
-    name: process.env.COOKIE_NAME,
-    store: new redisSessionStore({
-      client: redisClient,
-      disableTouch: true,
-    }),
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 2,
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
-    },
-    secret: process.env.SESSION_SECRET,
-    saveUninitialized: false,
-    resave: false,
-  })
-);
+// const redisSessionStore = connectRedis(session);
+// app.use(
+//   session({
+//     name: process.env.COOKIE_NAME,
+//     store: new redisSessionStore({
+//       client: redisClient,
+//       disableTouch: true,
+//     }),
+//     cookie: {
+//       maxAge: 1000 * 60 * 60 * 2,
+//       httpOnly: true,
+//       sameSite: 'lax',
+//       secure: false,
+//     },
+//     secret: process.env.SESSION_SECRET,
+//     saveUninitialized: false,
+//     resave: false,
+//   })
+// );
 
 // middleware
 app.use(express.json());

@@ -11,8 +11,10 @@ const User = require('../models/User');
 // @route   POST /room/public
 // @access  Private
 exports.createPublicRoom = asyncHandler(async (req, res, next) => {
-  req.body.creator = req.session.userId;
-  req.body.users = req.session.userId;
+  // req.body.creator = req.session.userId;
+  // req.body.users = req.session.userId;
+  req.body.creator = req.user;
+  req.body.users = req.user;
 
   const existRoom = await Room.findOne({ name: req.body.name, role: 'public' });
 
@@ -38,8 +40,8 @@ exports.joinToPublicRoom = asyncHandler(async (req, res, next) => {
     return next(new BadRequestError('Room with this name dose not exist'));
   }
 
-  if (!room.users.includes(req.session.userId)) {
-    const users = [...room.users, req.session.userId];
+  if (!room.users.includes(req.user)) {
+    const users = [...room.users, req.user];
 
     await Room.findByIdAndUpdate(
       room.id,
@@ -69,7 +71,7 @@ exports.createPrivateRoom = asyncHandler(async (req, res, next) => {
 
   const info = {
     name: `Private ${user.email}`,
-    creator: req.session.userId,
+    creator: req.user,
     role: 'private',
     receiver: user.id,
   };
@@ -98,7 +100,7 @@ exports.getPublicRoom = asyncHandler(async (req, res, next) => {
 
   publicRooms.forEach((room) => {
     const users = room.users;
-    if (users.includes(req.session.userId)) {
+    if (users.includes(req.user)) {
       yourPublicRooms.push(room);
     }
   });
@@ -113,13 +115,9 @@ exports.getPublicRoom = asyncHandler(async (req, res, next) => {
 // @route   GET /room/public
 // @access  Private
 exports.getPrivateRoom = asyncHandler(async (req, res, next) => {
-  const yourRoom = await Room.find({ role: 'private', creator: req.session.userId }).populate(
-    'receiver creator'
-  );
+  const yourRoom = await Room.find({ role: 'private', creator: req.user }).populate('receiver creator');
 
-  const invitedRoom = await Room.find({ role: 'private', receiver: req.session.userId }).populate(
-    'receiver creator'
-  );
+  const invitedRoom = await Room.find({ role: 'private', receiver: req.user }).populate('receiver creator');
 
   res.status(201).json({
     success: true,

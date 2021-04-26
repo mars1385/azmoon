@@ -1,9 +1,14 @@
 import { SET_USER_INFO, AUTH_FAILED, LOGOUT_USER, CLEAR_ERROR } from '../types';
 import axios from 'axios';
+import setAuthHeader from '../../utils/setAuthHeader';
 
 export const registerUser = (userInfo) => async (dispatch) => {
   try {
-    await axios.post('/user/register', userInfo);
+    const registerResponse = await axios.post('/user/register', userInfo);
+    const { token } = registerResponse.data;
+
+    localStorage.setItem('jwt_token', token);
+    setAuthHeader(token);
     dispatch(getUserInfo());
   } catch (error) {
     dispatch({
@@ -15,8 +20,11 @@ export const registerUser = (userInfo) => async (dispatch) => {
 
 export const loginUser = (userInfo) => async (dispatch) => {
   try {
-    await axios.post('/user/login', userInfo);
+    const login = await axios.post('/user/login', userInfo);
+    const { token } = login.data;
 
+    localStorage.setItem('jwt_token', token);
+    setAuthHeader(token);
     dispatch(getUserInfo());
   } catch (error) {
     dispatch({
@@ -28,7 +36,9 @@ export const loginUser = (userInfo) => async (dispatch) => {
 
 export const logoutUser = () => async (dispatch) => {
   try {
-    await axios.post('/user/logout');
+    // await axios.post('/user/logout');
+    localStorage.removeItem('jwt_token');
+    setAuthHeader(false);
     dispatch({
       type: LOGOUT_USER,
     });
